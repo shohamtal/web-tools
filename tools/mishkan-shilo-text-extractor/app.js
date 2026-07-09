@@ -10,6 +10,7 @@ const els = {
   pageInfo: $("pageInfo"),
   stripNikud: $("stripNikud"),
   extractBtn: $("extractBtn"),
+  ocrBtn: $("ocrBtn"),
   refreshBtn: $("refreshBtn"),
   saveListBtn: $("saveListBtn"),
   driveLink: $("driveLink"),
@@ -225,6 +226,75 @@ async function extractPageText(pdf, pageNum) {
   return blocks.join("\n");
 }
 
+// ---- OCR (image recognition) ---------------------------------------------
+// Optional path for text the PDF's text layer corrupts (vocalized quotes):
+// render each column to an image and read it with Tesseract's Hebrew model.
+const TESSERACT_SRC = "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js";
+const TESS_LANG_PATH = "https://tessdata.projectnaptha.com/4.0.0_best";
+
+let tesseractLoading = null;
+function loadTesseract() {
+  if (window.Tesseract) return Promise.resolve();
+  if (!tesseractLoading) {
+    tesseractLoading = new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = TESSERACT_SRC;
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error("failed to load tesseract.js"));
+      document.head.appendChild(s);
+    });
+  }
+  return tesseractLoading;
+}
+
+async function createOcrWorker() {
+  await loadTesseract();
+  const worker = await window.Tesseract.createWorker("heb", 1, { langPath: TESS_LANG_PATH });
+  await worker.setParameters({ tessedit_pageseg_mode: "4" }); // single column, variable sizes
+  return worker;
+}
+
+async function ocrPage(pdf, pageNum, worker, onProgress) {
+  const page = await pdf.getPage(pageNum);
+  const base = page.getViewport({ scale: 1 });
+  const W = Math.ceil(base.width);
+
+  // Column x-bounds from the (reliable) text-layer positions — OCR each column
+  // separately so a multi-column layout isn't read across.
+  let bounds = [[0, W]];
+  try {
+    const items = (await page.getTextContent()).items.filter((it) => it.str && it.str.trim());
+    if (items.length) {
+      const cols = detectColumns(items, W)
+        .filter((c) => c.hi - c.lo > 110)
+        .sort((a, b) => b.lo - a.lo); // right -> left
+      if (cols.length) bounds = cols.map((c) => [c.lo, c.hi]);
+    }
+  } catch (_) {}
+
+  const scale = 3;
+  const vp = page.getViewport({ scale });
+  const canvas = document.createElement("canvas");
+  canvas.width = vp.width;
+  canvas.height = vp.height;
+  await page.render({ canvasContext: canvas.getContext("2d"), viewport: vp }).promise;
+
+  let text = "";
+  for (let i = 0; i < bounds.length; i++) {
+    if (onProgress) onProgress(i + 1, bounds.length);
+    const [lo, hi] = bounds[i];
+    const cx = Math.floor(lo * scale);
+    const cw = Math.ceil((hi - lo) * scale);
+    const sub = document.createElement("canvas");
+    sub.width = cw;
+    sub.height = canvas.height;
+    sub.getContext("2d").drawImage(canvas, cx, 0, cw, canvas.height, 0, 0, cw, canvas.height);
+    const res = await worker.recognize(sub);
+    text += res.data.text.trim() + "\n\n";
+  }
+  return text;
+}
+
 // ---- Loading a PDF from a local file -------------------------------------
 async function loadFile(file) {
   if (!file) return;
@@ -344,44 +414,82 @@ els.saveListBtn.addEventListener("click", () => {
   URL.revokeObjectURL(a.href);
 });
 
-els.extractBtn.addEventListener("click", async () => {
-  if (!currentDoc?.pdf) {
-    return setStatus("טען תחילה קובץ PDF (שלב 2).", "err");
-  }
-  const pdf = currentDoc.pdf;
-
+function getRange(pdf) {
   let from = parseInt(els.fromPage.value, 10);
   let to = parseInt(els.toPage.value, 10);
   if (!Number.isInteger(from) || from < 1) from = 1;
   if (!Number.isInteger(to) || to < from) to = from;
+  to = Math.min(to, pdf.numPages);
+  return { from, to };
+}
 
+function showOutput(parts, from, to, numPages, method) {
+  els.output.value = parts.join("\n\n");
+  els.outputCard.hidden = false;
+  setStatus(`${method}: עמודים ${from}–${to} (מתוך ${numPages}).`, "ok");
+  els.outputCard.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function runExtraction(runner) {
+  if (!currentDoc?.pdf) {
+    return setStatus("טען תחילה קובץ PDF (שלב 2).", "err");
+  }
+  const pdf = currentDoc.pdf;
+  const { from, to } = getRange(pdf);
+  if (from > pdf.numPages) {
+    return setStatus(`בגיליון זה יש ${pdf.numPages} עמודים בלבד.`, "err");
+  }
   els.extractBtn.disabled = true;
+  els.ocrBtn.disabled = true;
   try {
-    if (from > pdf.numPages) {
-      setStatus(`בגיליון זה יש ${pdf.numPages} עמודים בלבד.`, "err");
-      return;
-    }
-    to = Math.min(to, pdf.numPages);
+    await runner(pdf, from, to);
+  } finally {
+    els.extractBtn.disabled = false;
+    els.ocrBtn.disabled = false;
+  }
+}
 
+// Fast path — read the PDF text layer.
+els.extractBtn.addEventListener("click", () =>
+  runExtraction(async (pdf, from, to) => {
     const parts = [];
     for (let p = from; p <= to; p++) {
       setStatus(`מחלץ עמוד ${p} מתוך ${to}…`, "busy");
       const raw = await extractPageText(pdf, p);
-      const cleaned = cleanText(raw, els.stripNikud.checked);
-      parts.push(to > from ? `— עמוד ${p} —\n${cleaned}` : cleaned);
+      parts.push(fmtPart(cleanText(raw, els.stripNikud.checked), p, from, to));
     }
-
-    els.output.value = parts.join("\n\n");
-    els.outputCard.hidden = false;
-    setStatus(`הטקסט חולץ מעמודים ${from}–${to} (מתוך ${pdf.numPages}).`, "ok");
-    els.outputCard.scrollIntoView({ behavior: "smooth", block: "start" });
-  } catch (err) {
-    console.error(err);
+    showOutput(parts, from, to, pdf.numPages, "חולץ מהטקסט");
+  }).catch((e) => {
+    console.error(e);
     setStatus("שגיאה בחילוץ הטקסט. נסה טווח עמודים אחר.", "err");
-  } finally {
-    els.extractBtn.disabled = false;
-  }
-});
+  })
+);
+
+// Image-recognition path — OCR the rendered page image.
+els.ocrBtn.addEventListener("click", () =>
+  runExtraction(async (pdf, from, to) => {
+    setStatus("טוען מנוע זיהוי תמונה (הורדה חד־פעמית, עשוי לקחת רגע)…", "busy");
+    const worker = await createOcrWorker();
+    try {
+      const parts = [];
+      for (let p = from; p <= to; p++) {
+        const text = await ocrPage(pdf, p, worker, (col, nCols) =>
+          setStatus(`זיהוי תמונה – עמוד ${p}/${to}${nCols > 1 ? `, טור ${col}/${nCols}` : ""}…`, "busy")
+        );
+        parts.push(fmtPart(cleanText(text, els.stripNikud.checked), p, from, to));
+      }
+      showOutput(parts, from, to, pdf.numPages, "זוהה מהתמונה");
+    } finally {
+      await worker.terminate();
+    }
+  }).catch((e) => {
+    console.error(e);
+    setStatus("שגיאה בזיהוי התמונה. ודא חיבור לאינטרנט ונסה שוב.", "err");
+  })
+);
+
+const fmtPart = (text, p, from, to) =>
+  to > from ? `— עמוד ${p} —\n${text}` : text;
 
 // ---- File input + drag & drop --------------------------------------------
 els.fileInput.addEventListener("change", (e) => {

@@ -25,6 +25,13 @@ Flow:
 3. Choose a page range and extract. **Everything runs locally in the browser — the
    file is never uploaded anywhere.**
 
+Two extraction modes:
+- **חלץ טקסט** — reads the PDF text layer (fast, accurate for the article prose).
+- **חלץ טקסט בעזרת זיהוי תמונה** — OCR (Tesseract.js Hebrew, loaded on demand from
+  CDN): renders each column to an image and reads it. Slower, but recovers the
+  vocalized biblical quotes that are corrupted in the PDF text layer. OCR columns
+  are cropped using the text layer's column positions.
+
 Notes:
 - The magazine list is a static file: `magazines.json` (issue number, parsha, Drive id).
 - pdf.js is vendored under `vendor/` so the tool has no CDN dependency and the worker

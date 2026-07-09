@@ -61,7 +61,11 @@
         <label class="chk"><input type="checkbox" id="stripNikud" checked /> הסר ניקוד (מומלץ – שכבת הניקוד בקובץ פגומה)</label>
       </div>
 
-      <button id="extractBtn" class="primary">חלץ טקסט</button>
+      <div class="extract-actions">
+        <button id="extractBtn" class="primary">חלץ טקסט</button>
+        <button id="ocrBtn" class="primary alt">חלץ טקסט בעזרת זיהוי תמונה</button>
+      </div>
+      <p class="hint">“חלץ טקסט” מהיר ומדויק לרוב הטקסט. “זיהוי תמונה” (OCR) איטי יותר אך קורא את התמונה — מומלץ לקטעים מנוקדים/מודגשים שיוצאים משובשים.</p>
       <div id="status" class="status" hidden></div>
     </section>
 
