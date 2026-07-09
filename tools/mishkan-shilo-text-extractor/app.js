@@ -90,6 +90,11 @@ const RE_NIKUD = /[֑-ׇֽֿׁׂׅׄ]/g;
 function cleanText(text, stripNikud) {
   let t = text.replace(RE_DIRECTIONAL, "");
   if (stripNikud) t = t.replace(RE_NIKUD, "");
+  // Decorative marker glyphs used around bold text — turn into spaces so
+  // adjacent words don't merge (e.g. "אבל$פינחס" -> "אבל פינחס").
+  t = t.replace(/[$#]/g, " ");
+  // Stray underscore inside a Hebrew word (e.g. "ש_לום" -> "שלום").
+  t = t.replace(/([֐-׿])_([֐-׿])/g, "$1$2");
   return t
     .split("\n")
     .map((line) => line.replace(/[ \t]{2,}/g, " ").trim())
@@ -97,6 +102,13 @@ function cleanText(text, stripNikud) {
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
+
+const median = (arr) => {
+  if (!arr.length) return 0;
+  const s = [...arr].sort((a, b) => a - b);
+  const m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+};
 
 // ---- Page text reconstruction (RTL + multi-column aware) -----------------
 // The magazines are laid out in 1–3 columns. We detect column gutters as
@@ -149,10 +161,12 @@ async function extractPageText(pdf, pageNum) {
   }
   cols.sort((a, b) => b.lo - a.lo); // rightmost column first (RTL)
 
-  const out = [];
+  const blocks = [];
   const tol = 4;
   for (const col of cols) {
     if (!col.items.length) continue;
+
+    // Group items into visual lines by y.
     const lines = [];
     for (const it of col.items) {
       const y = it.transform[5];
@@ -165,8 +179,9 @@ async function extractPageText(pdf, pageNum) {
     }
     lines.sort((a, b) => b.y - a.y); // top -> bottom
 
-    for (const line of lines) {
-      line.items.sort((a, b) => b.transform[4] - a.transform[4]); // right -> left
+    // Build each line's text (right -> left, gap-based spacing).
+    const built = lines.map((line) => {
+      line.items.sort((a, b) => b.transform[4] - a.transform[4]);
       let s = "";
       for (let i = 0; i < line.items.length; i++) {
         const cur = line.items[i];
@@ -178,11 +193,36 @@ async function extractPageText(pdf, pageNum) {
           if (gap > h * 0.25 && !s.endsWith(" ")) s += " ";
         }
       }
-      out.push(s);
+      return { y: line.y, text: s };
+    });
+
+    // Skip tiny numeric-only "columns" (page numbers).
+    const colText = built.map((l) => l.text).join("").replace(/\s/g, "");
+    if (colText.length < 4 && /^\d*$/.test(colText)) continue;
+
+    // Merge wrapped lines into paragraphs: a bigger-than-typical vertical
+    // gap starts a new paragraph; otherwise lines join with a space.
+    const gaps = [];
+    for (let i = 0; i < built.length - 1; i++) {
+      const g = built[i].y - built[i + 1].y;
+      if (g > 0) gaps.push(g);
     }
-    out.push(""); // blank line between columns
+    const medGap = median(gaps) || 12;
+    const breakGap = medGap + Math.max(2, medGap * 0.15);
+
+    let para = "";
+    for (let i = 0; i < built.length; i++) {
+      para = para ? para + " " + built[i].text : built[i].text;
+      const gap = built[i + 1] ? built[i].y - built[i + 1].y : Infinity;
+      if (gap > breakGap) {
+        blocks.push(para);
+        para = "";
+      }
+    }
+    if (para) blocks.push(para);
+    blocks.push(""); // blank line between columns
   }
-  return out.join("\n");
+  return blocks.join("\n");
 }
 
 // ---- Loading a PDF from a local file -------------------------------------
