@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Web Tools</title>
+  <title>כלים</title>
+  <link rel="icon" href="data:," />
   <style>
     :root {
       --bg: #0f1216; --card: #171b22; --card-h: #1e232c;
@@ -15,7 +16,7 @@
     * { box-sizing: border-box; }
     body {
       margin: 0; background: var(--bg); color: var(--text);
-      font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.6;
+      font-family: -apple-system, "Segoe UI", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif; line-height: 1.6;
     }
     .wrap { max-width: 760px; margin: 0 auto; padding: 48px 16px 60px; }
     h1 { font-size: 2rem; margin: 0 0 6px; }
@@ -29,24 +30,24 @@
     a.tool:hover { background: var(--card-h); transform: translateY(-2px); }
     .tool h2 { margin: 0 0 4px; font-size: 1.15rem; }
     .tool p { margin: 0; color: var(--muted); font-size: 0.95rem; }
-    .tool .arrow { float: right; color: var(--accent); font-size: 1.2rem; }
+    .tool .arrow { float: left; color: var(--accent); font-size: 1.2rem; }
     footer { margin-top: 40px; color: var(--muted); font-size: 0.82rem; }
   </style>
 </head>
 <body>
   <main class="wrap">
-    <h1>Web Tools</h1>
-    <p class="sub">A small collection of single-purpose browser tools. No install, no backend.</p>
+    <h1>כלים</h1>
+    <p class="sub">אוסף קטן של כלים המופעלים ישירות בדפדפן. בלי התקנה, בלי שרת.</p>
 
     <div class="grid">
       <a class="tool" href="tools/mishkan-shilo-text-extractor/">
-        <span class="arrow">›</span>
-        <h2>Mishkan Shilo — Text Extractor</h2>
-        <p>Pick a weekly magazine issue and a page range, and get clean, copy-ready Hebrew text (fixes the corrupted copy-paste from the PDFs).</p>
+        <span class="arrow">‹</span>
+        <h2>משכן שילה — מחלץ טקסט</h2>
+        <p>בוחרים גיליון וטווח עמודים ומקבלים טקסט עברי נקי ומוכן להעתקה (מתקן את הבעיה של העתקה פגומה מקובצי ה־PDF).</p>
       </a>
     </div>
 
-    <footer>Hosted on GitHub Pages · client-side only</footer>
+    <footer>מתארח ב־GitHub Pages · פועל כולו בצד הלקוח</footer>
   </main>
 </body>
 </html>

@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>מחלץ טקסט – משכן שילה</title>
+  <link rel="icon" href="data:," />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -11,16 +12,36 @@
     <header class="head">
       <a class="back" href="../../">‹ כל הכלים</a>
       <h1>מחלץ טקסט – עלוני משכן שילה</h1>
-      <p class="sub">בחר גיליון וטווח עמודים, והטקסט העברי יחולץ נקי ומוכן להעתקה.</p>
+      <p class="sub">מחלץ טקסט עברי נקי מתוך עלוני משכן שילה, במקום ההעתקה הפגומה מה־PDF.</p>
     </header>
 
     <section class="card">
+      <div class="step-title"><span class="num">1</span> בחר גיליון והורד אותו מ־Drive</div>
       <div class="field">
-        <label for="magazine">גיליון</label>
+        <div class="label-row">
+          <label for="magazine">גיליון</label>
+          <div class="list-actions">
+            <button id="refreshBtn" class="link-btn" type="button">↻ רענן רשימה</button>
+            <button id="saveListBtn" class="link-btn" type="button" hidden>⤓ שמור רשימה</button>
+          </div>
+        </div>
         <input type="search" id="filter" placeholder="חיפוש לפי מספר או פרשה…" autocomplete="off" />
         <select id="magazine" size="1"></select>
       </div>
+      <a id="driveLink" class="primary as-btn" href="#" target="_blank" rel="noopener">הורד מ־Drive ↗</a>
+      <p class="hint">בעמוד של Drive לחץ “הורדה בכל זאת”. הקובץ גדול (עשרות/מאות MB) — ההורדה עשויה לקחת זמן.</p>
+    </section>
 
+    <section class="card">
+      <div class="step-title"><span class="num">2</span> בחר את הקובץ שהורדת</div>
+      <label id="dropZone" class="dropzone" for="fileInput">
+        <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden />
+        <span id="dropText">גרור לכאן קובץ PDF, או לחץ לבחירה</span>
+      </label>
+    </section>
+
+    <section class="card">
+      <div class="step-title"><span class="num">3</span> בחר עמודים וחלץ</div>
       <div class="row">
         <div class="field">
           <label for="fromPage">מעמוד</label>
@@ -40,11 +61,7 @@
         <label class="chk"><input type="checkbox" id="stripNikud" checked /> הסר ניקוד (מומלץ – שכבת הניקוד בקובץ פגומה)</label>
       </div>
 
-      <div class="actions">
-        <button id="extractBtn" class="primary">חלץ טקסט</button>
-        <a id="driveLink" class="ghost" href="#" target="_blank" rel="noopener">פתח את הגיליון ב־Drive ↗</a>
-      </div>
-
+      <button id="extractBtn" class="primary">חלץ טקסט</button>
       <div id="status" class="status" hidden></div>
     </section>
 
@@ -57,7 +74,7 @@
     </section>
 
     <footer class="foot">
-      <p>הכלי מוריד רק את העמודים הנדרשים ישירות מ־Google Drive בדפדפן. ציטוטים מנוקדים עשויים לצאת פחות מדויקים בגלל פגם במקור.</p>
+      <p>הכל מתבצע בדפדפן שלך — הקובץ לא נשלח לשום שרת. ציטוטים מנוקדים עשויים לצאת פחות מדויקים בגלל פגם במקור.</p>
     </footer>
   </main>
 

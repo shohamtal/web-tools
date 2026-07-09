@@ -53,9 +53,36 @@ h1 { font-size: 1.55rem; margin: 0 0 6px; }
   margin-top: 16px;
 }
 
+.step-title { font-size: 1.05rem; font-weight: 600; margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
+.step-title .num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 50%; background: var(--accent);
+  color: #fff; font-size: 0.9rem; flex: none;
+}
+.as-btn { display: inline-block; text-decoration: none; text-align: center; }
+.hint { color: var(--muted); font-size: 0.82rem; margin: 10px 0 0; }
+
+.dropzone {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  min-height: 90px; padding: 18px; border: 2px dashed var(--border);
+  border-radius: 12px; color: var(--muted); cursor: pointer; transition: border-color .15s, background .15s;
+}
+.dropzone:hover { border-color: var(--accent); }
+.dropzone.dragover { border-color: var(--accent); background: var(--card-2); color: var(--text); }
+.dropzone.loaded { border-style: solid; border-color: var(--ok); color: var(--text); }
+
 .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
 .field:last-child { margin-bottom: 0; }
 label { font-size: 0.9rem; color: var(--muted); }
+
+.label-row { display: flex; align-items: center; justify-content: space-between; }
+.list-actions { display: flex; gap: 12px; }
+.link-btn {
+  background: none; border: none; color: var(--accent); cursor: pointer;
+  font-family: inherit; font-size: 0.85rem; padding: 0;
+}
+.link-btn:hover { text-decoration: underline; }
+.link-btn:disabled { opacity: 0.5; cursor: default; text-decoration: none; }
 
 input[type="search"], input[type="number"], select {
   background: var(--card-2);

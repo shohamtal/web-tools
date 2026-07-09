@@ -15,16 +15,22 @@ Copying directly from the PDFs produces corrupted text (the InDesign Hebrew expo
 wraps every line in bidirectional control characters and scrambles the niqqud layer).
 This tool loads the chosen issue with [pdf.js](https://mozilla.github.io/pdf.js/),
 extracts the requested page range, strips the directional control characters (and
-optionally the broken niqqud), reconstructs right-to-left reading order, and shows the
-result with a copy button.
+optionally the broken niqqud), reconstructs right-to-left **multi-column** reading
+order, and shows the result with a copy button.
 
+Flow:
+1. Pick an issue from the list and click **הורד מ־Drive** to download it (Google
+   Drive blocks direct browser downloads via CORS, so the file is downloaded normally).
+2. Drop the downloaded PDF onto the tool.
+3. Choose a page range and extract. **Everything runs locally in the browser — the
+   file is never uploaded anywhere.**
+
+Notes:
 - The magazine list is a static file: `magazines.json` (issue number, parsha, Drive id).
-- PDFs are fetched **directly in the browser** from Google Drive's
-  `drive.usercontent.google.com` download endpoint, which sends `Access-Control-Allow-Origin: *`
-  and supports HTTP Range requests — so only the bytes for the requested pages are downloaded,
-  not the whole (often 100+ MB) file.
-- Vocalized biblical quotes may still come out imperfect because that text is damaged in
-  the source PDF itself.
+- pdf.js is vendored under `vendor/` so the tool has no CDN dependency and the worker
+  is same-origin.
+- Vocalized biblical quotes may still come out imperfect because that text is damaged
+  in the source PDF itself.
 
 #### Updating the magazine list
 New issues appear weekly on the
