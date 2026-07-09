@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>מחלץ טקסט – משכן שילה</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="head">
+      <a class="back" href="../../">‹ כל הכלים</a>
+      <h1>מחלץ טקסט – עלוני משכן שילה</h1>
+      <p class="sub">בחר גיליון וטווח עמודים, והטקסט העברי יחולץ נקי ומוכן להעתקה.</p>
+    </header>
+
+    <section class="card">
+      <div class="field">
+        <label for="magazine">גיליון</label>
+        <input type="search" id="filter" placeholder="חיפוש לפי מספר או פרשה…" autocomplete="off" />
+        <select id="magazine" size="1"></select>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="fromPage">מעמוד</label>
+          <input type="number" id="fromPage" min="1" value="1" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <label for="toPage">עד עמוד</label>
+          <input type="number" id="toPage" min="1" value="1" inputmode="numeric" />
+        </div>
+        <div class="field pagecount">
+          <label>&nbsp;</label>
+          <span id="pageInfo" class="muted">—</span>
+        </div>
+      </div>
+
+      <div class="options">
+        <label class="chk"><input type="checkbox" id="stripNikud" checked /> הסר ניקוד (מומלץ – שכבת הניקוד בקובץ פגומה)</label>
+      </div>
+
+      <div class="actions">
+        <button id="extractBtn" class="primary">חלץ טקסט</button>
+        <a id="driveLink" class="ghost" href="#" target="_blank" rel="noopener">פתח את הגיליון ב־Drive ↗</a>
+      </div>
+
+      <div id="status" class="status" hidden></div>
+    </section>
+
+    <section class="card output" id="outputCard" hidden>
+      <div class="output-head">
+        <h2>הטקסט שחולץ</h2>
+        <button id="copyBtn" class="primary small">העתק</button>
+      </div>
+      <textarea id="output" dir="rtl" readonly spellcheck="false"></textarea>
+    </section>
+
+    <footer class="foot">
+      <p>הכלי מוריד רק את העמודים הנדרשים ישירות מ־Google Drive בדפדפן. ציטוטים מנוקדים עשויים לצאת פחות מדויקים בגלל פגם במקור.</p>
+    </footer>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
