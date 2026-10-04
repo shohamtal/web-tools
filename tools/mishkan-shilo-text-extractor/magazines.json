@@ -1,5 +1,17 @@
 [
   {
+    "issue": 1038,
+    "title": "גיליון משכן שילה 1038 - פרשת בראשית תשפ\"ז.",
+    "parsha": "פרשת בראשית תשפ\"ז",
+    "id": "1G_V8Xy3FmpXLnUco7w7d-30srVP0oR8n"
+  },
+  {
+    "issue": 1037,
+    "title": "גיליון משכן שילה 1037 - שמחת תורה תשפ\"ז.",
+    "parsha": "שמחת תורה תשפ\"ז",
+    "id": "12eMNPlOmy9jFxIeRkkmMbxuUM9rqpG2w"
+  },
+  {
     "issue": 1036,
     "title": "גיליון משכן שילה 1036 - חג הסוכות תשפ\"ז.",
     "parsha": "חג הסוכות תשפ\"ז",
@@ -292,17 +304,5 @@
     "title": "גיליון משכן שילה 988 - פרשת נח תשפ\"ו.",
     "parsha": "פרשת נח תשפ\"ו",
     "id": "1yBg1hRHVSOnLXMKJwmH5gP8QKsECFpeB"
-  },
-  {
-    "issue": 987,
-    "title": "גיליון משכן שילה 987 - פרשת בראשית תשפ\"ו.",
-    "parsha": "פרשת בראשית תשפ\"ו",
-    "id": "1K0rDRXGlcA4VOSTTJKlKDcKtBPJjVVR5"
-  },
-  {
-    "issue": 986,
-    "title": "גיליון משכן שילה 986 - שבת חול המועד ושמחת תורה תשפ\"ו.",
-    "parsha": "שבת חול המועד ושמחת תורה תשפ\"ו",
-    "id": "1CgvCUMBTblsW5TXoFbK1W7dDQ6pBCT7X"
   }
 ]
